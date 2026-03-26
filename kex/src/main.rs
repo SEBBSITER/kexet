@@ -1,6 +1,9 @@
 use std::env;
 use common::*;
+use client::pool::ClientPool;
+
 mod common;
+mod client;
 
 enum Flag {
     Clients(i32),
@@ -28,5 +31,21 @@ fn main() {
             std::process::exit(1);
         }
     };
-    config.get_status();
+
+    // Dummy testing of client training
+    let mut pool = ClientPool::new();
+    pool.create_clients(
+        config.number_clients,
+        "python", // Note windows
+        "worker.py",
+    ).expect("Failed to add clients");
+
+    pool.init_all().expect("Failed to init all clients");
+    pool.train_all(5,5,5.0).expect("Failed to train");
+    pool.shutdown_all().expect("Failed to shutdown all clients");
+
+    // TODO: Data loading
+    // TODO: Initialize clients
+    // Clients are loaded directly after configuration to avoid latency during simulation
+    // TODO: Include status bar
 }

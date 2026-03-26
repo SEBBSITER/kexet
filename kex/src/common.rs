@@ -33,7 +33,7 @@ impl From<std::io::Error> for ConfigError {
 }
 
 pub struct Config {
-    number_clients: usize,
+    pub(crate) number_clients: usize,
     number_servers: usize,
     topology: Topology,
 }
