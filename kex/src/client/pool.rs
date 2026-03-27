@@ -2,6 +2,7 @@ use std::process::{Child, ChildStdin, ChildStdout, Command, Stdio};
 use std::io::{BufReader, BufRead, Write, stderr};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use std::path::PathBuf;
 
 type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 
@@ -52,7 +53,7 @@ struct Client {
 impl Client {
     fn spawn(
         client_id: usize,
-        python_path: &str,
+        python_path: &PathBuf,
         worker_script: &str,
     ) -> Result<Self> {
         let mut child = Command::new(python_path)
@@ -157,7 +158,7 @@ impl ClientPool {
 
     pub fn create_clients(
         &mut self, number_clients: usize,
-        python_path: &str,
+        python_path: &PathBuf,
         worker_script: &str
     ) -> Result<()> {
         for client_id in 0..number_clients {

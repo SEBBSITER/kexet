@@ -1,6 +1,8 @@
 use std::env;
 use common::*;
 use client::pool::ClientPool;
+use std::path::{Path, PathBuf};
+use std::process::Command;
 
 mod common;
 mod client;
@@ -11,6 +13,16 @@ const PYTHON_COMMAND: &str = "python";
 
 #[cfg(target_os="macos")]
 const PYTHON_COMMAND: &str = "python3";
+
+#[cfg(target_os="windows")]
+fn venv_python_path(venv_dir: &Path) -> PathBuf {
+    venv_dir.join("Scripts").join("python.exe")
+}
+
+#[cfg(target_os="macos")]
+fn venv_python_path(venv_dir: &Path) -> PathBuf {
+    venv_dir.join("bin").join("python")
+}
 
 enum Flag {
     Clients(i32),
@@ -29,6 +41,37 @@ fn setup_configuration() -> Result<Config, ConfigError> {
     Ok(config)
 }
 
+// Check for existing python virtual environment, create one if missing
+fn ensure_venv() -> PathBuf {
+    let project_root = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    let venv_dir = project_root.join("venv");
+    let python = venv_python_path(&venv_dir);
+
+    if !python.exists() {
+        println!("Virtual environment doesn't exist. Creating it now...");
+        let status = Command::new(PYTHON_COMMAND)
+            .args(["-m", "venv"])
+            .arg(&venv_dir)
+            .status()
+            .expect("Failed to create venv");
+
+        assert!(status.success(), "venv creation failed");
+
+        println!("Installing dependencies...");
+        let requirements = project_root.join("requirements.txt");
+
+        let status = Command::new(&python)
+            .args(["-m", "pip", "install", "-r"])
+            .arg(&requirements)
+            .status()
+            .expect("Failed to run pip install");
+
+        assert!(status.success(), "pip install fail");
+    }
+
+    python
+}
+
 fn main() {
     // Set up configuration
     let config = match setup_configuration() {
@@ -39,11 +82,14 @@ fn main() {
         }
     };
 
+    // Set up virtual environment
+    let python = ensure_venv();
+
     // Dummy testing of client training
     let mut pool = ClientPool::new();
     pool.create_clients(
         config.number_clients,
-        PYTHON_COMMAND,
+        &python,
         "worker.py",
     ).expect("Failed to add clients");
 
