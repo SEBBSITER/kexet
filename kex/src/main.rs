@@ -5,6 +5,13 @@ use client::pool::ClientPool;
 mod common;
 mod client;
 
+// Windows / Mac support
+#[cfg(target_os="windows")]
+const PYTHON_COMMAND: &str = "python";
+
+#[cfg(target_os="macos")]
+const PYTHON_COMMAND: &str = "python3";
+
 enum Flag {
     Clients(i32),
     Servers(i32),
@@ -36,7 +43,7 @@ fn main() {
     let mut pool = ClientPool::new();
     pool.create_clients(
         config.number_clients,
-        "python", // Note windows
+        PYTHON_COMMAND,
         "worker.py",
     ).expect("Failed to add clients");
 
