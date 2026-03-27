@@ -1,4 +1,5 @@
-# TODOs:
-- [ ] Edge device node
-- [ ] Edge server node
-- [ ] Cloud server node
+Dependencies:
+- Rust installed on the system
+- Python installed on the system 
+
+brb...
