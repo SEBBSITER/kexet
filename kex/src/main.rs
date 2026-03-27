@@ -5,6 +5,7 @@ use std::path::{Path, PathBuf};
 use std::process::Command;
 
 mod common;
+mod dataloader;
 mod client;
 
 // Windows / Mac support
@@ -98,7 +99,6 @@ fn main() {
     pool.shutdown_all().expect("Failed to shutdown all clients");
 
     // TODO: Data loading
-    // TODO: Initialize clients
     // Clients are loaded directly after configuration to avoid latency during simulation
     // TODO: Include status bar
 }
