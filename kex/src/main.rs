@@ -1,9 +1,14 @@
 use std::env;
 use common::*;
-use client::pool::ClientPool;
+use client::ClientPool;
 
 mod common;
+mod event;
 mod client;
+mod simulator;
+mod network;
+mod nemesis;
+mod node;
 
 enum Flag {
     Clients(i32),

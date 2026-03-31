@@ -1,6 +1,9 @@
 use std::fs;
 use std::fmt;
 
+pub type NodeId = u32;
+pub type EventSeq = u64;
+
 #[derive(Debug)]
 pub enum ConfigError {
     Io(std::io::Error),
@@ -124,3 +127,5 @@ impl Config {
         Ok(())
     }
 }
+
+pub struct Message {}
