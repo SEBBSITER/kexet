@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+crossterm = "0.29.0"
 rand = "0.10.0"
 rand_distr = "0.6.0"
 serde = { version = "1.0.228", features = ["derive"] }

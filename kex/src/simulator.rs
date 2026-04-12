@@ -1,18 +1,14 @@
 use std::cmp::Reverse;
 use std::collections::{BinaryHeap, HashMap};
 use event::ScheduledEvent;
-use crate::common::NodeId;
+use crate::common::{NodeId, Tick};
 use crate::event;
 use crate::event::Event;
 use crate::network::Network;
 use crate::node::Node;
 
-// Discrete-event simulation with a logical clock
-#[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
-pub struct Tick(pub u64);
-
 pub struct Simulator {
-    clock: Tick,
+    pub(crate) clock: Tick,
     seq_counter: u64,
     queue: BinaryHeap<Reverse<ScheduledEvent>>,
     nodes: HashMap<NodeId, Box<dyn Node>>,
@@ -20,6 +16,24 @@ pub struct Simulator {
 }
 
 impl Simulator {
+    pub fn new(clock: Tick, seq_counter: u64, network: Network) -> Simulator {
+        Self {
+            clock,
+            seq_counter,
+            queue: BinaryHeap::new(),
+            nodes: HashMap::new(),
+            network,
+        }
+    }
+
+    pub fn next_event(&mut self) -> Option<ScheduledEvent> {
+        if let Some(Reverse(event)) = self.queue.pop() {
+            Some(event)
+        } else {
+            None
+        }
+    }
+
     pub fn next_seq(&mut self) -> u64 {
         let seq = self.seq_counter;
         self.seq_counter += 1;
@@ -46,5 +60,7 @@ impl Simulator {
                 Event::Deliver { .. } => {}
             };
         }
+
+        println!("All events in queue executed.");
     }
 }

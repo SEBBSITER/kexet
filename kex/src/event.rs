@@ -1,5 +1,4 @@
-use crate::common::{EventSeq, Message, NodeId};
-use crate::simulator::Tick;
+use crate::common::{EventSeq, Message, NodeId, Tick};
 use std::cmp::Ordering;
 
 pub enum Event {

@@ -1,5 +1,4 @@
-use crate::common::{Message, NodeId};
-use crate::simulator::Tick;
+use crate::common::{Message, NodeId, Tick};
 
 pub enum NemesisAction {
     Partition {

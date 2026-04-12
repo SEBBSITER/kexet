@@ -4,6 +4,10 @@ use std::fmt;
 pub type NodeId = u32;
 pub type EventSeq = u64;
 
+// Discrete-event simulation with a logical clock
+#[derive(Copy, Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct Tick(pub u64);
+
 #[derive(Debug)]
 pub enum ConfigError {
     Io(std::io::Error),

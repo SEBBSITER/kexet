@@ -1,7 +1,6 @@
 use std::collections::HashMap;
-use crate::common::{Message, NodeId};
+use crate::common::{Message, NodeId, Tick};
 use crate::nemesis::{Nemesis, NemesisVerdict};
-use crate::simulator::Tick;
 use rand::rngs::{StdRng};
 use rand::{Rng, RngExt};
 use rand_distr::{Distribution, Normal};
@@ -19,6 +18,17 @@ pub struct LinkConfig {
     pub loss_rate: f64,
     pub reorder_rate: f64,
     pub bandwidth_bps: Option<u64>,
+}
+
+impl LinkConfig {
+    pub fn perfect_link() -> LinkConfig {
+        Self {
+            latency: LatencyModel::Fixed(Tick(0)),
+            loss_rate: 0.0,
+            reorder_rate: 0.0,
+            bandwidth_bps: None,
+        }
+    }
 }
 
 #[derive(Clone)]
@@ -51,6 +61,13 @@ impl LatencyModel {
     }
 }
 
+pub enum TopologyType {
+    Star,
+    Mesh,
+    Ring,
+    Tree,
+}
+
 pub struct Topology {
     links: HashMap<(NodeId, NodeId), LinkConfig>,
     default_link: Option<LinkConfig>,
@@ -69,6 +86,90 @@ pub struct Network {
     topology: Topology,
     nemesis: Box<dyn Nemesis>,
     rng: StdRng,
+}
+
+impl Network {
+    pub fn new(topology_type: TopologyType, number_clients: usize, number_servers: usize) -> Network {
+
+        // TO easily manage ID
+        let total_nodes = number_clients + number_servers;
+
+        let links = match topology_type {
+            TopologyType::Star => Self::create_star_topology(
+                number_clients,
+                number_servers,
+            ),
+            TopologyType::Mesh => Self::create_mesh_topology(
+                number_clients,
+                number_servers,
+                total_nodes,
+            ),
+            TopologyType::Ring => Self::create_ring_topology(
+                number_clients,
+                number_servers,
+                total_nodes,
+            ),
+            TopologyType::Tree => Self::create_balanced_tree_topology(
+                number_clients,
+                number_servers,
+                total_nodes,
+            ),
+        };
+
+        let topology = Topology { links, default_link: None };
+        let nemesis = Nemesis::new();
+        let rng = StdRng::from_seed();
+
+        Self {
+            topology,
+            nemesis,
+            rng,
+        }
+    }
+
+    fn create_star_topology(
+        number_clients: usize,
+        number_servers: usize,
+    ) -> HashMap<(NodeId, NodeId), LinkConfig> {
+        let mut links = HashMap::new();
+        for s_id in 0..number_servers {
+            for c_idx in number_servers..number_clients {
+                let config = LinkConfig::perfect_link();
+                links.insert((s_id as NodeId, c_idx as NodeId), config.clone());
+                links.insert((c_idx as NodeId, s_id as NodeId), config.clone());
+            }
+        }
+        links
+    }
+
+    fn create_mesh_topology(
+        number_clients: usize,
+        number_servers: usize,
+        total_nodes: usize,
+    ) -> HashMap<(NodeId, NodeId), LinkConfig> {
+        // TODO: Implement mesh topology
+        let mut links = HashMap::new();
+        links
+    }
+
+    fn create_ring_topology(
+        number_clients: usize,
+        number_servers: usize,
+        total_nodes: usize,
+    ) -> HashMap<(NodeId, NodeId), LinkConfig> {
+        let mut links = HashMap::new();
+        links
+    }
+
+    fn create_balanced_tree_topology(
+        number_clients: usize,
+        number_servers: usize,
+        total_nodes: usize,
+    ) -> HashMap<(NodeId, NodeId), LinkConfig> {
+        // TODO: Implement tree topology
+        let mut links = HashMap::new();
+        links
+    }
 }
 
 impl Network {

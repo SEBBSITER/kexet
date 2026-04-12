@@ -1,6 +1,8 @@
 use std::env;
 use common::*;
 use client::ClientPool;
+use crate::network::Network;
+use crate::simulator::Simulator;
 
 mod common;
 mod event;
@@ -27,7 +29,7 @@ fn setup_configuration() -> Result<Config, ConfigError> {
     Ok(config)
 }
 
-fn main() {
+fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Set up configuration
     let config = match setup_configuration() {
         Ok(config) => config,
@@ -37,7 +39,9 @@ fn main() {
         }
     };
 
-    // Dummy testing of client training
+    // TODO: Initialize training data
+
+    // Initialize client pool
     let mut pool = ClientPool::new();
     pool.create_clients(
         config.number_clients,
@@ -45,12 +49,21 @@ fn main() {
         "worker.py",
     ).expect("Failed to add clients");
 
-    pool.init_all().expect("Failed to init all clients");
-    pool.train_all(5,5,5.0).expect("Failed to train");
-    pool.shutdown_all().expect("Failed to shutdown all clients");
+    // TODO: Initialize network using configuration
+    let network = Network::new();
 
-    // TODO: Data loading
-    // TODO: Initialize clients
-    // Clients are loaded directly after configuration to avoid latency during simulation
-    // TODO: Include status bar
+    // TODO: Create simulation
+    let mut simulator = Simulator::new(Tick(0),0, network);
+
+    // Initialize simulation
+    pool.init_all().expect("Failed to init all clients");
+
+    println!("Running simulation, press 'q' to abort...");
+
+    // Run simulation loop
+    simulator.run();
+
+    // Graceful shutdown
+    pool.shutdown_all().expect("Failed to shutdown all clients");
+    Ok(())
 }
