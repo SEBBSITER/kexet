@@ -1,3 +1,4 @@
+use std::collections::{HashMap, HashSet};
 use crate::common::{Message, NodeId, Tick};
 
 pub enum NemesisAction {
@@ -28,11 +29,29 @@ pub enum NemesisVerdict {
     Delay(Message, Tick),
 }
 
-pub trait Nemesis {
-    fn on_send(&mut self, from: NodeId, to: NodeId, msg: Message, now: Tick) -> NemesisVerdict;
+pub struct Nemesis {
+    partitions: Vec<(HashSet<NodeId>, HashSet<NodeId>)>,
+    crashed_nodes: HashSet<NodeId>,
+    link_overrides: HashMap<(NodeId, NodeId), Tick>
+}
+
+impl Nemesis {
+    pub fn new() -> Nemesis {
+        Self {
+            partitions: Vec::new(),
+            crashed_nodes: HashSet::new(),
+            link_overrides: HashMap::new(),
+        }
+    }
+
+    pub(crate) fn on_send(&mut self, from: NodeId, to: NodeId, msg: Message, _now: Tick) -> NemesisVerdict {
+        todo!()
+    }
 
     //
-    fn on_action(&mut self, action: NemesisAction);
+    fn on_action(&mut self, action: NemesisAction) {
+        todo!()
+    }
 }
 
 struct LatencyDistribution {}

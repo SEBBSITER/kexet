@@ -84,7 +84,7 @@ impl Topology {
 
 pub struct Network {
     topology: Topology,
-    nemesis: Box<dyn Nemesis>,
+    nemesis: Nemesis,
     rng: StdRng,
 }
 
@@ -118,7 +118,7 @@ impl Network {
 
         let topology = Topology { links, default_link: None };
         let nemesis = Nemesis::new();
-        let rng = StdRng::from_seed();
+        let rng = rand::make_rng();
 
         Self {
             topology,

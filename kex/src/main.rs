@@ -1,7 +1,7 @@
 use std::env;
 use common::*;
 use client::ClientPool;
-use crate::network::Network;
+use crate::network::{Network, TopologyType};
 use crate::simulator::Simulator;
 
 mod common;
@@ -50,7 +50,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     ).expect("Failed to add clients");
 
     // TODO: Initialize network using configuration
-    let network = Network::new();
+    let network = Network::new(TopologyType::Star, config.number_clients, config.number_servers);
 
     // TODO: Create simulation
     let mut simulator = Simulator::new(Tick(0),0, network);
