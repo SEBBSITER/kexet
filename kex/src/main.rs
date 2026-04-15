@@ -1,6 +1,7 @@
 use std::env;
 use common::*;
 use client::ClientPool;
+use crate::event::{Event, ScheduledEvent};
 use crate::network::{Network, TopologyType};
 use crate::simulator::Simulator;
 
@@ -59,6 +60,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     pool.init_all().expect("Failed to init all clients");
 
     println!("Running simulation, press 'q' to abort...");
+
+    // TODO: Remove, dummy queing for checking
+    let ids = simulator.node_ids().to_vec();
+    for client in ids {
+        simulator.enqueue(Tick(1), Event::BeginTraining{ node: client, round: 0 });
+    }
 
     // Run simulation loop
     simulator.run();

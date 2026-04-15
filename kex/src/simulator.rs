@@ -8,10 +8,9 @@ use crate::network::Network;
 use crate::node::Node;
 
 pub struct Simulator {
-    pub(crate) clock: Tick,
+    clock: Tick,
     seq_counter: u64,
     queue: BinaryHeap<Reverse<ScheduledEvent>>,
-    nodes: HashMap<NodeId, Box<dyn Node>>,
     network: Network,
 }
 
@@ -21,7 +20,6 @@ impl Simulator {
             clock,
             seq_counter,
             queue: BinaryHeap::new(),
-            nodes: HashMap::new(),
             network,
         }
     }
@@ -40,7 +38,7 @@ impl Simulator {
         seq
     }
 
-    fn enqueue(&mut self, time: Tick, event: Event) {
+    pub fn enqueue(&mut self, time: Tick, event: Event) {
         let seq = self.next_seq();
         self.queue.push(Reverse(ScheduledEvent::new(time, seq, event)));
     }
@@ -62,5 +60,17 @@ impl Simulator {
         }
 
         println!("All events in queue executed.");
+    }
+
+    pub fn get_time(self) -> (Tick, u64) {
+        (self.clock, self.seq_counter)
+    }
+
+    pub fn node_ids(&self) -> &[NodeId] {
+        &self.network.registry.clients
+    }
+
+    pub fn server_ids(&self) -> &[NodeId] {
+        &self.network.registry.servers
     }
 }

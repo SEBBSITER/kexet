@@ -61,6 +61,38 @@ impl LatencyModel {
     }
 }
 
+pub struct NodeRegistry {
+    pub(crate) servers: Vec<NodeId>,
+    pub(crate) clients: Vec<NodeId>,
+}
+
+impl NodeRegistry {
+    fn new() -> NodeRegistry {
+        Self {
+            servers: Vec::new(),
+            clients: Vec::new(),
+        }
+    }
+
+    pub fn all_nodes(&self) -> impl Iterator<Item = &NodeId> {
+        self.servers.iter().chain(self.clients.iter())
+    }
+
+    // TODO: Add error handling
+    fn add_server(&mut self, node: NodeId) {
+        // TODO: Check for uniqueness
+        self.servers.push(node);
+        //Ok(())
+    }
+
+    // TODO: Add error handling
+    fn add_client(&mut self, node: NodeId) {
+        // TODO: Check for uniqueness
+        self.clients.push(node);
+        //Ok(())
+    }
+}
+
 pub enum TopologyType {
     Star,
     Mesh,
@@ -83,6 +115,7 @@ impl Topology {
 }
 
 pub struct Network {
+    pub(crate) registry: NodeRegistry,
     topology: Topology,
     nemesis: Nemesis,
     rng: StdRng,
@@ -93,6 +126,17 @@ impl Network {
 
         // TO easily manage ID
         let total_nodes = number_clients + number_servers;
+
+        // TODO: Find better solution for ID registration. Currently allows for mismatches
+        let mut registry= NodeRegistry::new();
+        // First 0..<number_servers is id for servers
+        for id in 0..number_servers {
+            registry.add_server(id as u32);
+        }
+        // number_servers..<total_nodes is id for clients
+        for id in number_servers..number_clients {
+            registry.add_client(id as u32);
+        }
 
         let links = match topology_type {
             TopologyType::Star => Self::create_star_topology(
@@ -121,6 +165,7 @@ impl Network {
         let rng = rand::make_rng();
 
         Self {
+            registry,
             topology,
             nemesis,
             rng,
